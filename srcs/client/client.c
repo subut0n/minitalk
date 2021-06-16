@@ -6,7 +6,7 @@
 /*   By: addzikow <addzikow@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/16 12:05:42 by addzikow          #+#    #+#             */
-/*   Updated: 2021/06/16 14:10:24 by addzikow         ###   ########.fr       */
+/*   Updated: 2021/06/16 17:56:43 by addzikow         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,23 +25,39 @@ int init_client(char *str)
     return (pid);
 }
 
-void send_bits(pid_t pid, char *msg)
+void send_bits(pid_t pid, char c)
 {
-    
+    int bit;
+    int send;
+    int signal;
 
-
+    while (bit < 8)
+    {
+        send = (c >> bit++) & 1;
+        if (send == 0)
+            signal = SIGUSR1;
+        if (send == 1)
+            signal = SIGUSR2;
+        if (kill(pid, signal) == -1)
+        {
+            ft_putstr("Message can not be sent.\n");
+            exit(EXIT_FAILURE);
+        }
+    }
 }
 
 int main(int argc, char **argv)
 {
     pid_t pid;
+    int i;
 
     if (argc != 3)
     {
         ft_putstr("Minitalk args should be : ./client <pid> <message>\n");
         exit(EXIT_FAILURE);
     }
-    pid = init_client(argv[2]);
-
-
+    pid = init_client(argv[1]);
+    i = -1;
+    while (argv[2][++i])
+        send_bits(pid, argv[2][i]);
 }
