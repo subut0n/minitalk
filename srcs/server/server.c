@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: addzikow <addzikow@42student.lyon.fr>      +#+  +:+       +#+        */
+/*   By: addzikow <addzikow@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/15 16:15:00 by addzikow          #+#    #+#             */
-/*   Updated: 2021/06/24 19:18:53 by addzikow         ###   ########lyon.fr   */
+/*   Updated: 2021/07/03 22:46:20 by addzikow         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,31 +26,81 @@ void    print_pid(void)
     free(pid);
 }
 
-
-char    *add_char_buffer(char c, char *str)
+void	send_to_client(int signal)
 {
-    char *ret;
-    int size;
-    int i;
-
-    size = 0;
-    while (str[size])
-        size++;
-    ret = malloc(sizeof(char) * (size + 1));
-    if (!ret)
-    {
-        printf("minitalk: Memory allocation issue.");
-        exit (EXIT_FAILURE);
-    }
-    i = -1;
-    while (str[++i])
-        ret[i] = str[i];
-    ret[i + 1] = c;
-    free(str);
-    return (ret);
+	if (kill(client_pid, signal) == -1)
+	{
+		printf("minitalk: a signal error has occurred.\n");
+		exit(EXIT_FAILURE);
+	}
 }
 
-void    recover_bits(int sig, char *str)
+static int	alloc(char **str, size_t current, char c)
+{
+	char	*tmp;
+	size_t	i;
+
+	i = -1;
+	if (*str == NULL)
+	{
+		*str = malloc((128 + 1) * sizeof(char *));
+		if (*str == NULL)
+			return (-1);
+		return ((*str)[current] = c);
+	}
+	if (current >= (current + 1))
+	{
+		tmp = malloc((128 + 1 + current) * sizeof(char *));
+		if (tmp == NULL)
+			return (-1);
+		while (++i < current)
+			tmp[i] = (*str)[i];
+		free(*str);
+		tmp[i] = c;
+		*str = tmp;
+		return (true);
+	}
+	return ((*str)[current] = c);
+}
+
+static void	exit_server(char **str)
+{
+	if (*str != NULL)
+	{
+		free(*str);
+		*str = NULL;
+	}
+	printf("minitalk: a memory error has occurred.\n");
+	exit(EXIT_FAILURE);
+}
+
+void	add_char(char c)
+{
+	static long	current = 0;
+	static char	*str = NULL;
+	int			ret;
+
+	if (c == '\0')
+	{
+		ret = alloc(&str, current++, '\n');
+		if (ret == -1)
+			exit_server(&str);
+		ret = alloc(&str, current++, c);
+		if (ret == -1)
+			exit_server(&str);
+		write(1, str, current);
+		free(str);
+		str = NULL;
+		current = 0;
+		send_to_client(SIGUSR2);
+		return ;
+	}
+	ret = alloc(&str, current++, c);
+	if (ret == -1)
+		exit_server(&str);
+}
+
+void    recover_bits(int sig)
 {
     static char c = 0;
     static int bits = 0;
@@ -58,29 +108,21 @@ void    recover_bits(int sig, char *str)
     c += (sig << bits++);
     if (bits == 8)
     {
-        if (c == '\0')
-        {
-            str = add_char_buffer('\n', str);
-            str = add_char_buffer(c, str);
-            ft_putstr_fd(str, 1);
-            free(str);
-        }
-        else
-            str = add_char_buffer(c, str);
+ 
+        add_char(c);
         c = 0;
         bits = 0;
     }
 }
+
 void    handle_signal(int sig, siginfo_t *info, void *context)
 {   
-    char *str;
     (void)context;
 
-    str = malloc(sizeof(char));
     if (sig == SIGUSR1)
-        recover_bits(0, str);
+        recover_bits(0);
     if (sig == SIGUSR2)
-        recover_bits(1, str);
+        recover_bits(1);
     if (info->si_pid > 0)
 		client_pid = info->si_pid;
     if (kill(client_pid, SIGUSR1) == -1)
@@ -107,69 +149,3 @@ int	main(void)
 		pause();
     return (0);
 }
-
-////////////////////////////////////////////////////////////////
-
-// void	print_pid(void)
-// {
-// 	ft_putstr_fd("Server PID: ", 1);
-// 	ft_putnbr_fd(getpid(), 1);
-// 	ft_putchar_fd('\n', 1);
-// }
-
-// void	write_char(int sig)
-// {
-// 	static char unsigned	c = 0;
-// 	static int				i = 0;
-
-// 	c |= (sig << i++);
-// 	if (i > 7)
-// 	{
-// 		if (c == '\0')
-// 		{
-// 			ft_putchar_fd('\n', 1);
-// 			ft_putchar_fd(c, 1);
-// 		}
-// 		else
-// 			ft_putchar_fd(c, 1);
-// 		i = 0;
-// 		c = 0;
-// 	}
-// }
-
-// void	write_signal(int sig, siginfo_t *info, void *context)
-// {
-// 	if (sig == SIGUSR1)
-// 		write_char(0);
-// 	if (sig == SIGUSR2)
-// 		write_char(1);
-// 	(void)context;
-// 	kill(info->si_pid, SIGUSR1);
-// }
-
-// void	init_signal(void)
-// {
-// 	struct sigaction	sa;
-
-// 	sa.sa_flags = SA_SIGINFO;
-//     sa.sa_sigaction = write_signal;
-// 	if (sigaction(SIGUSR1, &sa, NULL) == -1)
-// 	{
-// 		ft_putstr_fd("Error: initialize of signal is failed", 1);
-// 		exit(0);
-// 	}
-// 	if (sigaction(SIGUSR2, &sa, NULL) == -1)
-// 	{
-// 		ft_putstr_fd("Error: initialize of signal is failed", 1);
-// 		exit(0);
-// 	}
-// }
-
-// int	main(void)
-// {
-// 	print_pid();
-// 	init_signal();
-// 	while (1)
-// 		pause();
-// 	return (0);
-// }

@@ -1,4 +1,4 @@
-GCC := gcc -Wall -Wextra -Werror
+GCC := gcc -Wall -Wextra -Werror -g3 -fsanitize=address
 CLIENT := client
 SERVER := server
 CLIENT_SRC := ./srcs/client/client.c

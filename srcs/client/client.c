@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   client.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: addzikow <addzikow@42student.lyon.fr>      +#+  +:+       +#+        */
+/*   By: addzikow <addzikow@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/16 12:05:42 by addzikow          #+#    #+#             */
-/*   Updated: 2021/06/24 10:18:42 by addzikow         ###   ########lyon.fr   */
+/*   Updated: 2021/07/03 21:21:16 by addzikow         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,67 +97,3 @@ int main(int argc, char **argv)
     return (0);
 }
 
-/////////////////////////////////////////////////////////////////////////////////////
-
-
-// void	send_signal(int pid, int nb)
-// {
-// 	if (nb == 0 && kill(pid, SIGUSR1) == -1)
-// 	{
-// 		ft_putstr_fd("Error: failure to send signal\n", 1);
-// 		exit(0);
-// 	}
-// 	if (nb == 1 && kill(pid, SIGUSR2) == -1)
-// 	{
-// 		ft_putstr_fd("Error: failure to send signal\n", 1);
-// 		exit(0);
-// 	}
-// }
-
-// void	send_char_to_pid(int pid, char c)
-// {
-// 	int	i;
-// 	int	nb;
-
-// 	i = 0;
-// 	while (i < 8)
-// 	{
-// 		nb = (c >> i++) & 1;
-// 		send_signal(pid, nb);
-// 		usleep(800);
-// 	}
-// }
-
-// void	send_str_to_pid(int pid, char *str)
-// {
-// 	int	i;
-
-// 	i = -1;
-// 	while (str[++i])
-// 		send_char_to_pid(pid, str[i]);
-// 	send_char_to_pid(pid, 0);
-// }
-
-// void	handler(int sig)
-// {
-// 	sig = 0;
-//     sig++;
-//     sig--;
-// }
-
-// int	main(int argc, char **arg)
-// {
-// 	int	pid_server;
-
-// 	if (argc == 3)
-// 	{
-// 		pid_server = ft_atoi(arg[1]);
-// 		if (pid_server <= 1)
-// 			ft_putstr_fd("Error PID\n", 1);
-// 		signal(SIGUSR1, &handler);
-// 		send_str_to_pid(pid_server, arg[2]);
-// 	}
-// 	else
-// 		ft_putstr_fd("./client <PID server> <message>\n", 1);
-// 	return (0);
-// }
