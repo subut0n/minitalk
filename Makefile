@@ -1,43 +1,32 @@
-.PHONY: all clean fclean re
-NAME	= minitalk.a
+GCC := gcc -Wall -Wextra -Werror
+CLIENT := client
+SERVER := server
+CLIENT_SRC := ./srcs/client/client.c
+SERVER_SRC := ./srcs/server/server.c
+CLIENT_OBJ := $(CLIENT_SRC:.c=.o)
+SERVER_OBJ := $(SERVER_SRC:.c=.o)
+LIBFT := libft/libft.a
 
-PATH_INCS 	= includes
-PATH_SRCS 	= srcs
-PATH_OBJS 	= objs
-PATH_LIBFT	= libft
-LIBFT		= $(addprefix libft/, libft.a)
-
-SRCS		=	$(addprefix $(PATH_SRCS)/, minitalk.c)
-OBJS		=	$(addprefix $(PATH_OBJS)/, $(notdir $(SRCS:.c=.o)))
-INCS		=	$(PATH_INCS)/minitalk.h $(PATH_LIBFT)/libft.h
-
-GCC			= gcc
-COMP_INC	= -I$(PATH_LIBFT) -I$(PATH_INCS)
-RM			= rm -rf
-
-CFLAGS		= -Wall -Wextra -Werror
-
-all:	 $(PATH_OBJS) $(NAME)
-
-$(NAME):	$(OBJS) $(INCS) $(LIBFT)
-			mv libft/libft.a minitalk.a
-			ar rcs $(NAME) $(OBJS)
-
-$(PATH_OBJS)/%.o : $(PATH_SRCS)/*/%.c $(INCS)
-				$(GCC) $(CFLAGS) $(COMP_INC) -c $< -o $@
-
-$(PATH_OBJS):
-		mkdir -p $(PATH_OBJS)
+all: $(LIBFT) $(CLIENT) $(SERVER)
 
 $(LIBFT):
-		$(MAKE) -C $(PATH_LIBFT)
+	@$(MAKE) -C libft all
+
+$(CLIENT): $(CLIENT_OBJ)
+		$(GCC) -o $(CLIENT) $(CLIENT_OBJ) $(LIBFT)
+
+$(SERVER): $(SERVER_OBJ)
+		$(GCC) -o $(SERVER) $(SERVER_OBJ) $(LIBFT)
+
+%.o: %.c
+		$(GCC) -o $@ -c $<
 
 clean:
-		$(RM) $(PATH_OBJS)
-		$(MAKE) -C $(PATH_LIBFT) clean
+		@$(MAKE) -C libft clean
+		rm -f $(SERVER_OBJ) $(CLIENT_OBJ)
 
-fclean:	clean
-		$(RM) $(NAME)
-		$(MAKE) -C $(PATH_LIBFT) fclean
+fclean:
+		@$(MAKE) -C libft fclean
+		rm -f $(CLIENT) $(SERVER) $(CLIENT_OBJ) $(SERVER_OBJ)
 
-re:		fclean all
+re: fclean all
