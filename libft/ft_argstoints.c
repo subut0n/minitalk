@@ -6,21 +6,21 @@
 /*   By: addzikow <addzikow@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/08 10:07:10 by addzikow          #+#    #+#             */
-/*   Updated: 2021/06/08 10:07:41 by addzikow         ###   ########.fr       */
+/*   Updated: 2021/07/04 19:46:37 by addzikow         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-int *ft_argstoints(int ac, char **av)
+int	*ft_argstoints(int ac, char **av)
 {
-	char **fchar;
-	int *fint;
-	int i;
+	char	**fchar;
+	int		*fint;
+	int		i;
 
 	fchar = malloc(sizeof(char *) * (ac));
 	if (!fchar)
-		return (NULL) ;
+		return (NULL);
 	i = 0;
 	while (i < ac - 1)
 	{
@@ -30,7 +30,7 @@ int *ft_argstoints(int ac, char **av)
 	fchar[ac - 1] = NULL;
 	fint = malloc(sizeof(int *) * (ac));
 	if (!fint)
-		return(NULL);
+		return (NULL);
 	i = 0;
 	while (fchar[i])
 	{

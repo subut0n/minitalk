@@ -2,7 +2,7 @@ GCC := gcc -Wall -Wextra -Werror -g3 -fsanitize=address
 CLIENT := client
 SERVER := server
 CLIENT_SRC := ./srcs/client/client.c
-SERVER_SRC := ./srcs/server/server.c
+SERVER_SRC := ./srcs/server/server.c ./srcs/server/server_utils.c
 CLIENT_OBJ := $(CLIENT_SRC:.c=.o)
 SERVER_OBJ := $(SERVER_SRC:.c=.o)
 LIBFT := libft/libft.a
@@ -27,6 +27,6 @@ clean:
 
 fclean:
 		@$(MAKE) -C libft fclean
-		rm -f $(CLIENT) $(SERVER) $(CLIENT_OBJ) $(SERVER_OBJ)
+		rm -f $(CLIENT) $(SERVER) $(CLIENT_OBJ) $(SERVER_OBJ) minitalk.a
 
 re: fclean all

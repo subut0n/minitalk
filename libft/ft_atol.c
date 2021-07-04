@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_atol.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: addzikow <addzikow@student.42lyon.fr>      +#+  +:+       +#+        */
+/*   By: addzikow <addzikow@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/05/20 12:39:57 by addzikow          #+#    #+#             */
-/*   Updated: 2021/05/20 14:17:24 by addzikow         ###   ########lyon.fr   */
+/*   Updated: 2021/07/04 19:45:04 by addzikow         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,8 @@
 long int	ft_atol(const char *str)
 {
 	long int	final;
-	int	sign;
-	int	i;
+	int			sign;
+	int			i;
 
 	i = 0;
 	while ((str[i] >= 9 && str[i] <= 13) || str[i] == 32)
