@@ -12,70 +12,70 @@
 
 #include "../../includes/minitalk.h"
 
-static void	server_signal(int type)
+static volatile int	g_received = 0;
+
+static void	server_response(int sig, siginfo_t *info, void *context)
 {
-	if (type == SIGUSR1)
-		check_signal(true);
-	if (type == SIGUSR2)
+	(void)info;
+	(void)context;
+	if (sig == SIGUSR1)
+		g_received = 1;
+	else if (sig == SIGUSR2)
 	{
-		printf("minitalk: The message was sent with success!\n");
-		exit(EXIT_SUCCESS);
+		write(1, "minitalk: message sent with success!\n", 36);
+		_exit(EXIT_SUCCESS);
 	}
 }
 
-bool	check_signal(bool can_send)
+static pid_t	init_client(char *str)
 {
-	static bool	status = false;
-
-	if (can_send)
-		status = true;
-	else if (status)
-	{
-		status = false;
-		return (true);
-	}
-	return (false);
-}
-
-pid_t	init_client(char *str)
-{
-	pid_t	pid;
+	struct sigaction	act;
+	pid_t				pid;
 
 	pid = ft_atoi(str);
-	if (pid < 100 || pid > 99998)
+	if (pid <= 0)
 	{
-		ft_putstr_fd("Invalid PID\n", 1);
+		ft_putstr_fd("Invalid PID\n", 2);
 		exit(EXIT_FAILURE);
 	}
-	if ((signal(SIGUSR1, server_signal) == SIG_ERR)
-		|| (signal(SIGUSR2, server_signal) == SIG_ERR))
+	sigemptyset(&act.sa_mask);
+	act.sa_flags = SA_SIGINFO;
+	act.sa_sigaction = server_response;
+	if ((sigaction(SIGUSR1, &act, NULL) == -1)
+		|| (sigaction(SIGUSR2, &act, NULL) == -1))
 	{
-		printf("minitalk: a signal error has occurred.\n");
+		ft_putstr_fd("minitalk: signal setup failed\n", 2);
 		exit(EXIT_FAILURE);
 	}
 	return (pid);
 }
 
-void	send_bits(pid_t pid, char c)
+static void	send_bits(pid_t pid, char c)
 {
 	int	bit;
-	int	send;
-	int	signal;
+	int	sig;
+	int	attempts;
 
 	bit = 0;
 	while (bit < 8)
 	{
-		send = (c >> bit++) & 1;
-		if (send == 0)
-			signal = SIGUSR1;
-		if (send == 1)
-			signal = SIGUSR2;
-		if (kill(pid, signal) == -1)
+		if ((c >> bit) & 1)
+			sig = SIGUSR2;
+		else
+			sig = SIGUSR1;
+		g_received = 0;
+		if (kill(pid, sig) == -1)
 		{
-			ft_putstr_fd("Message can not be sent.\n", 1);
+			ft_putstr_fd("Message can not be sent.\n", 2);
 			exit(EXIT_FAILURE);
 		}
-		usleep(800);
+		attempts = 0;
+		while (!g_received && attempts < 50)
+		{
+			usleep(100);
+			attempts++;
+		}
+		bit++;
 	}
 }
 
@@ -86,13 +86,16 @@ int	main(int argc, char **argv)
 
 	if (argc != 3)
 	{
-		ft_putstr_fd("Minitalk args should be : ./client <pid> <message>\n", 1);
+		ft_putstr_fd("Usage: ./client <pid> <message>\n", 2);
 		exit(EXIT_FAILURE);
 	}
 	pid = init_client(argv[1]);
-	i = -1;
-	while (argv[2][++i])
+	i = 0;
+	while (argv[2][i])
+	{
 		send_bits(pid, argv[2][i]);
+		i++;
+	}
 	send_bits(pid, '\0');
 	return (0);
 }

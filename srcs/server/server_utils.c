@@ -17,18 +17,20 @@ char	*alloc(char *str, int buffer, int size)
 	int		i;
 	char	*ret;
 
-	i = -1;
-	ret = malloc(sizeof(char) * (buffer));
+	i = 0;
+	ret = malloc(sizeof(char) * buffer);
 	if (!ret)
 	{
-		printf("minitalk: Memory allocation issue.");
-		exit (EXIT_FAILURE);
+		write(2, "minitalk: malloc failed\n", 23);
+		_exit(EXIT_FAILURE);
 	}
-	if (size != 1)
+	while (i < size - 1)
 	{
-		while (++i < size)
-			ret[i] = str[i];
+		ret[i] = str[i];
+		i++;
 	}
+	if (str && size > 1)
+		free(str);
 	return (ret);
 }
 
@@ -41,7 +43,7 @@ char	*add_char_buffer(char c, char *str)
 	size++;
 	if (size == 1)
 		str = alloc(str, buffer, size);
-	if (size == buffer)
+	else if (size == buffer)
 	{
 		buffer += buffer;
 		str = alloc(str, buffer, size);
@@ -70,8 +72,9 @@ void	recover_bits(int sig)
 		{
 			str = add_char_buffer('\n', str);
 			str = add_char_buffer(c, str);
-			ft_putstr_fd(str, 1);
+			write(1, str, ft_strlen(str));
 			free(str);
+			str = NULL;
 			send_to_client(SIGUSR2);
 		}
 		else

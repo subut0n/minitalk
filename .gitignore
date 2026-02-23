@@ -1,0 +1,12 @@
+# Object files
+*.o
+
+# Static libraries
+*.a
+
+# Binaries
+/client
+/server
+
+# OS
+.DS_Store

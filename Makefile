@@ -1,4 +1,5 @@
-GCC := gcc -Wall -Wextra -Werror -g3 -fsanitize=address
+CC := gcc
+CFLAGS := -Wall -Wextra -Werror -D_XOPEN_SOURCE=700 -D_DEFAULT_SOURCE
 CLIENT := client
 SERVER := server
 CLIENT_SRC := ./srcs/client/client.c
@@ -13,20 +14,22 @@ $(LIBFT):
 	@$(MAKE) -C libft all
 
 $(CLIENT): $(CLIENT_OBJ)
-		$(GCC) -o $(CLIENT) $(CLIENT_OBJ) $(LIBFT)
+	$(CC) $(CFLAGS) -o $(CLIENT) $(CLIENT_OBJ) $(LIBFT)
 
 $(SERVER): $(SERVER_OBJ)
-		$(GCC) -o $(SERVER) $(SERVER_OBJ) $(LIBFT)
+	$(CC) $(CFLAGS) -o $(SERVER) $(SERVER_OBJ) $(LIBFT)
 
 %.o: %.c
-		$(GCC) -o $@ -c $<
+	$(CC) $(CFLAGS) -o $@ -c $<
 
 clean:
-		@$(MAKE) -C libft clean
-		rm -f $(SERVER_OBJ) $(CLIENT_OBJ)
+	@$(MAKE) -C libft clean
+	rm -f $(SERVER_OBJ) $(CLIENT_OBJ)
 
 fclean:
-		@$(MAKE) -C libft fclean
-		rm -f $(CLIENT) $(SERVER) $(CLIENT_OBJ) $(SERVER_OBJ) minitalk.a
+	@$(MAKE) -C libft fclean
+	rm -f $(CLIENT) $(SERVER) $(CLIENT_OBJ) $(SERVER_OBJ)
 
 re: fclean all
+
+.PHONY: all clean fclean re
